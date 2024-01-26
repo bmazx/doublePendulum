@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+# Other
+src/doublePendulum
+src/compile_commands.json
+src/.cache
+Makefile
+*.clang-format
