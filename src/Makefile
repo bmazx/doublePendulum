@@ -2,12 +2,12 @@ CFLAGS = -std=c++20 -O2
 
 LDFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
 
-INC_PATH = dependencies
-INC_DIR = -I$(INC_PATH)/glad/include -I$(INC_PATH)/glfw/include
+INC_DIR = -Idependencies -Idependencies/glad/include -Idependencies/glfw/include
 
-GLAD_SRC = $(INC_PATH)/glad/src/glad.c
+IMGUI_DIR = dependencies/imgui
+IMGUI_SRC = $(IMGUI_DIR)/imgui_widgets.cpp $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_impl_glfw.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_impl_opengl3.cpp $(IMGUI_DIR)/imgui_tables.cpp
 
-PROJECT_SRC = main.cpp dependencies/glad/src/glad.c ogls.cpp
+PROJECT_SRC = main.cpp dependencies/glad/src/glad.c ogls.cpp $(IMGUI_SRC)
 
 doublePendulum: main.cpp
 	g++ -g $(CFLAGS) -o doublePendulum $(PROJECT_SRC) $(LDFLAGS) $(INC_DIR)

@@ -7,17 +7,19 @@ struct OglsVertexBuffer
 {
 	float* vertices;
 	uint32_t id, size, count;
+	GLenum bufferMode;
 };
 
 struct OglsIndexBuffer
 {
 	uint32_t* indices;
 	uint32_t id, size, count;
+	GLenum bufferMode;
 };
 
 struct OglsVertexArray
 {
-	uint32_t id;
+	uint32_t id, vboId, iboId;
 };
 
 struct OglsShader
@@ -28,6 +30,7 @@ struct OglsShader
 namespace ogls
 {
 	static GLenum getOglDataTypeEnum(OglsDataType dataType);
+	static GLenum getBufferMode(OglsBufferMode bufferMode);
 
 	static GLenum getOglDataTypeEnum(OglsDataType dataType)
 	{
@@ -44,6 +47,17 @@ namespace ogls
 		}
 
 		return GL_NONE;
+	}
+	
+	static GLenum getBufferMode(OglsBufferMode bufferMode)
+	{
+		switch (bufferMode)
+		{
+		case Ogls_BufferMode_Static: { return GL_STATIC_DRAW; }
+		case Ogls_BufferMode_Dynamic: { return GL_DYNAMIC_DRAW; }
+		}
+
+		return GL_STATIC_DRAW;
 	}
 
 	OglsResult printErrorCodeMsg(const char* file, int line)
@@ -66,40 +80,46 @@ namespace ogls
 		return err == 0 ? Ogls_Result_Success : Ogls_Result_Failed;
 	}
 
-	OglsResult createVertexBuffer(OglsVertexBuffer** vertexBuffer, float* vertices, uint32_t count)
+	OglsResult createVertexBuffer(OglsVertexBuffer** vertexBuffer, float* vertices, uint32_t size, OglsBufferMode bufferMode)
 	{
+		GLenum vertexBufferMode = getBufferMode(bufferMode);
+
 		uint32_t vbo;
 		glGenBuffers(1, &vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, count * sizeof(float), vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, size, vertices, vertexBufferMode);
 		if (OGLS_CHECK_ERROR() == Ogls_Result_Failed) { return Ogls_Result_Failed; }
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		*vertexBuffer = new OglsVertexBuffer();
 		OglsVertexBuffer* vertexBufferPtr = *vertexBuffer;
 		vertexBufferPtr->vertices = vertices;
-		vertexBufferPtr->count = count;
-		vertexBufferPtr->size = count * sizeof(float);
+		vertexBufferPtr->count = size / sizeof(float);
+		vertexBufferPtr->size = size;
 		vertexBufferPtr->id = vbo;
+		vertexBufferPtr->bufferMode = vertexBufferMode;
 
 		return Ogls_Result_Success;
 	}
 
-	OglsResult createIndexBuffer(OglsIndexBuffer** indexBuffer, uint32_t* indices, uint32_t count)
+	OglsResult createIndexBuffer(OglsIndexBuffer** indexBuffer, uint32_t* indices, uint32_t size, OglsBufferMode bufferMode)
 	{
+		GLenum indexBufferMode = getBufferMode(bufferMode);
+
 		uint32_t ibo;
 		glGenBuffers(1, &ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint32_t), indices, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, indexBufferMode);
 		if (OGLS_CHECK_ERROR() == Ogls_Result_Failed) { return Ogls_Result_Failed; }
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		*indexBuffer = new OglsIndexBuffer();
 		OglsIndexBuffer* indexBufferPtr = *indexBuffer;
 		indexBufferPtr->indices = indices;
-		indexBufferPtr->count = count;
-		indexBufferPtr->size = count * sizeof(uint32_t);
+		indexBufferPtr->count = size / sizeof(uint32_t);
+		indexBufferPtr->size = size;
 		indexBufferPtr->id = ibo;
+		indexBufferPtr->bufferMode = indexBufferMode;
 
 		return Ogls_Result_Success;
 	}
@@ -111,12 +131,15 @@ namespace ogls
 		glBindVertexArray(vao);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, createInfo->vertexBuffer->id);
-		glBufferData(GL_ARRAY_BUFFER, createInfo->vertexBuffer->size, createInfo->vertexBuffer->vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, createInfo->vertexBuffer->size, createInfo->vertexBuffer->vertices, createInfo->vertexBuffer->bufferMode);
 		if (OGLS_CHECK_ERROR() == Ogls_Result_Failed) { return Ogls_Result_Failed; }
-		
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, createInfo->indexBuffer->id);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->indexBuffer->size, createInfo->indexBuffer->indices, GL_STATIC_DRAW);
-		if (OGLS_CHECK_ERROR() == Ogls_Result_Failed) { return Ogls_Result_Failed; }
+	
+		if (createInfo->indexBuffer)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, createInfo->indexBuffer->id);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, createInfo->indexBuffer->size, createInfo->indexBuffer->indices, createInfo->indexBuffer->bufferMode);
+			if (OGLS_CHECK_ERROR() == Ogls_Result_Failed) { return Ogls_Result_Failed; }
+		}
 
 		for (uint32_t i = 0; i < createInfo->attributeCount; i++)
 		{ 
@@ -131,17 +154,15 @@ namespace ogls
 		}
 
 		glBindVertexArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 		*vertexArray = new OglsVertexArray();
 		OglsVertexArray* vertexArrayPtr = *vertexArray;
+		vertexArrayPtr->vboId = createInfo->vertexBuffer->id;
+		if (createInfo->indexBuffer) vertexArrayPtr->iboId = createInfo->indexBuffer->id;
 		vertexArrayPtr->id = vao;
 
-		return Ogls_Result_Success;
-	}
-
-	OglsResult createShader(OglsShader** shader, OglsShaderCreateInfo* pathToShaderFiles)
-	{
-		
 		return Ogls_Result_Success;
 	}
 
@@ -214,12 +235,12 @@ namespace ogls
 		return indexBuffer->id;
 	}
 
-	uint32_t getVertexBufferId(OglsVertexArray* vertexArray)
+	uint32_t getVertexArrayId(OglsVertexArray* vertexArray)
 	{
 		return vertexArray->id;
 	}
 
-	uint32_t getVertexBufferId(OglsShader* shader)
+	uint32_t getShaderId(OglsShader* shader)
 	{
 		return shader->id;
 	}
@@ -227,22 +248,54 @@ namespace ogls
 
 	void bindVertexBuffer(OglsVertexBuffer* vertexBuffer)
 	{
+		if (!vertexBuffer)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			return;
+		}
+
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id);
 	}
 
 	void bindIndexBuffer(OglsIndexBuffer* indexBuffer)
 	{
+		if (!indexBuffer)
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			return;
+		}
+
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id);
 	}
 
 	void bindVertexArray(OglsVertexArray* vertexArray)
 	{
+		if (!vertexArray)
+		{
+			glBindVertexArray(0);
+			return;
+		}
+
 		glBindVertexArray(vertexArray->id);
 	}
 
 	void bindShader(OglsShader* shader)
 	{
 		glUseProgram(shader->id);
+	}
+
+	void bindVertexBufferSubData(OglsVertexBuffer* vertexBuffer, uint32_t size, uint32_t offset, float* data)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->id);
+		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+	
+	void bindIndexBufferSubData(OglsIndexBuffer* indexBuffer, uint32_t size, uint32_t offset, uint32_t* data)
+	{
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->id);
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
 	void destroyVertexBuffer(OglsVertexBuffer* vertexBuffer)
@@ -279,4 +332,13 @@ namespace ogls
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
 	}
 
+	void renderDrawMode(uint32_t mode, uint32_t first, uint32_t count)
+	{
+		glDrawArrays(mode, first, count);
+	}
+	
+	void renderDrawIndexMode(uint32_t mode, uint32_t count)
+	{
+		glDrawElements(mode, count, GL_UNSIGNED_INT, 0);
+	}
 }
