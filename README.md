@@ -17,9 +17,7 @@ Build using ```make``` on linux
 On Windows use ```cmake --build .```
 
 # Edit with ImGui
-The mass, length, angles, and gravity can be changed using Imgui
-
-Press F1 while the program is running to open the settings window. 
-You can then pause and configure the mass or lengths of the pendulums.
+Press the (`) key to open the settings window.
+You can pause and change the masses and lengths of each of the pendulums.
 
 ![screenshot_dp](.github/dpImgui.png)
