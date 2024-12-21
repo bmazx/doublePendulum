@@ -305,7 +305,7 @@ int main(int argv, char** argc)
 
 	auto timer = std::chrono::high_resolution_clock::now();
 
-	printf("Press the (`) key on the keyboard to change the settings\n");
+	printf("Press the \'c\' key on the keyboard to open the settings\n");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -313,7 +313,7 @@ int main(int argv, char** argc)
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		int key = glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS;
+		int key = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
 
 		if (key == GLFW_PRESS && !pressOnce)
 		{
