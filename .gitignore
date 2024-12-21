@@ -32,8 +32,10 @@
 *.app
 
 # Other
+build/
 src/doublePendulum
 src/compile_commands.json
 src/.cache
 Makefile
 *.clang-format
+*.ini

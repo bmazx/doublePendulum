@@ -103,31 +103,21 @@ struct OglsShaderCreateInfo
 
 struct OglsVec2
 {
-	union
-	{
-		struct { float x, y; };
-		struct { float r, g; };
-		struct { float s, t; };
-	};
+	union { float x, r, s; };
+	union { float y, g, t; };
 };
 
 struct OglsVec3
 {
-	union
-	{
-		struct { float x, y, z; };
-		struct { float r, g, b; };
-		struct { float s, t, p; };
-	};
+	union { float x, r, s; };
+	union { float y, g, t; };
+	union { float z, b, p; };
 };
 
 struct OglsVec4
 {
-	union
-	{
-		struct { float x, y, z, w; };
-		struct { float r, g, b, a; };
-		struct { float s, t, p, q; };
-	};
-
+	union { float x, r, s; };
+	union { float y, g, t; };
+	union { float z, b, p; };
+	union { float w, a, q; };
 };

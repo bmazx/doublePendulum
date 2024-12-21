@@ -1,3 +1,4 @@
+#include "glm/fwd.hpp"
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -68,7 +69,7 @@ uniform mat4 u_Camera;
 
 void main()
 {
-    gl_Position = u_Camera * vec4(aPos, 0.0, 1.0);
+	gl_Position = u_Camera * vec4(aPos, 0.0, 1.0);
 	fragColor = aColor;
 }
 )";
@@ -82,13 +83,13 @@ out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(fragColor, 1.0f);
+	outColor = vec4(fragColor, 1.0f);
 }
 )";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+	glViewport(0, 0, width, height);
 }
 
 float radians(float deg)
@@ -304,13 +305,15 @@ int main(int argv, char** argc)
 
 	auto timer = std::chrono::high_resolution_clock::now();
 
+	printf("Press the (`) key on the keyboard to change the settings\n");
+
     while (!glfwWindowShouldClose(window))
     {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		int key = glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS;
+		int key = glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS;
 
 		if (key == GLFW_PRESS && !pressOnce)
 		{
