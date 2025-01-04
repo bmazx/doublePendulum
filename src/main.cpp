@@ -102,6 +102,9 @@ void drawPoly(BatchGroup* batch, OglsVec2 pos, OglsVec3 color, float radius, uin
 	batch->vertices.clear();
 	batch->indices.clear();
 
+	batch->vertices.reserve(nSides + 1);
+	batch->indices.reserve(nSides * 3 + 1);
+
 	batch->vertices.push_back({ pos, color });
 
 	float twoPi = (float)(2 * PI);
