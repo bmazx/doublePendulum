@@ -296,7 +296,7 @@ int main(int argv, char** argc)
     batch.vertexBuffer = vertexBuffer;
     batch.indexBuffer = indexBuffer;
     batch.vertexArray = vertexArray;
-    
+
     BatchGroup batchTrail{};
     batchTrail.vertexBuffer = trailVertexBuffer;
     batchTrail.vertexArray = trailVertexArray;
@@ -324,7 +324,7 @@ int main(int argv, char** argc)
                 p_open = true;
             else
                 p_open = false;
-            
+
             pressOnce = true;
         }
         else if (key == GLFW_RELEASE)
@@ -354,7 +354,7 @@ int main(int argv, char** argc)
         a2 = clampAngle(a2);
         }
 
-        
+
 
         // begin render
         glClearColor(COLOR_BG, 1.0f);
@@ -407,7 +407,7 @@ int main(int argv, char** argc)
             a1 = angles[0]; a2 = angles[1];
             ImGui::Spacing();
             ImGui::DragFloat("gravity constant", &gChange, 0.1f);
-            
+
             ImGui::Checkbox("gravity", &gravityOn);
             ImGui::SameLine();
             ImGui::Checkbox("trails", &drawTrailPath);
@@ -425,7 +425,7 @@ int main(int argv, char** argc)
             }
 
             ImGui::SameLine();
-            
+
             if (ImGui::Button("randomize mass"))
             {
                 m1 = 0.1f + (rand() % 100);
@@ -481,7 +481,7 @@ int main(int argv, char** argc)
 
             ImGui::Spacing();
             ImGui::DragFloat("time step", &dt, 0.001f, 0.0001f, 1.0f, "%.4f");
-            
+
             ImGui::Spacing();
             ImGui::Text("Camera:");
             ImGui::SliderFloat("FOV", &fov, 10.0f, 90.0f);
